@@ -15,7 +15,7 @@
 clc
 clear all
 
-int = 15; % each aircraft arrives every tot minutes as specified by int
+int = 10; % each aircraft arrives every tot minutes as specified by int
 
 B777 = 368; % max number of passesngers per aircraft type 
 B737 = 116;
@@ -23,10 +23,13 @@ E190 = 96;
 air_types = [B777,B737,E190];
 
 
+
 day = 1440; % number of minutes in one day
 stop = 120; % how much time before midnight flights stop arriving (in minutes). This is needed to avoid that aircraft depart after midnight
 N = floor(day/int)-floor(stop/int) ; % number of aircraft in one day.   
 table= zeros(N,day); % schedule matrix
+
+air_list = ones(1,N); % list of arriving aircraft types 
 
 i = 1; % counter aircraft  
 t = 1; % counter passing minutes in a day
@@ -43,7 +46,7 @@ while t <= day-120
                 
             if nnz(table(i,1:day))< 2 % nnz --> number of non zero elements
             
-            
+                air_list(i) = count ;
             %%_____ defining arrival times for aircraft i in the form 'hhmm' (see function 'schedule.m' for further explanation') 
               
               
@@ -188,11 +191,15 @@ while t <= day-120
                 i = i+1;
                 count = count +1;
                 
+                
                 if count == 4 % index count runs through the air_types list making sure that arriving aircraft alternate in type
                     count = 1;
                 
                 
                 end
+                
+              
+                
             end  % end if nnz
         end  % end if
   
