@@ -8,12 +8,12 @@
 
 %% The time interval between two arriving aircraft is defined by the variable 'int' and it is initially set to 15 minutes, but it can be changed as you like. The script has been tested with values of 10,11,12,13,15,17,20,25,26,30 minutes
 
-%% The schedule matrix is defined by the variable 'table': each row corresponds to one aircraft 
+%% The schedule matrix is defined by the variable 'schedule_table': each row corresponds to one aircraft 
 
 %%__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 clc
-clear all
+% clear all
 
 int = 10; % each aircraft arrives every tot minutes as specified by int
 
@@ -27,7 +27,7 @@ air_types = [B777,B737,E190];
 day = 1440; % number of minutes in one day
 stop = 120; % how much time before midnight flights stop arriving (in minutes). This is needed to avoid that aircraft depart after midnight
 N = floor(day/int)-floor(stop/int) ; % number of aircraft in one day.   
-table= zeros(N,day); % schedule matrix
+schedule_table= zeros(N,day); % schedule matrix
 
 air_list = ones(1,N); % list of arriving aircraft types 
 
@@ -44,7 +44,7 @@ while t <= day-120
             
         if t/int-floor(t/int) == 0 % defines arrival time every tot minutes as specified by int. the if conditions implies an exact division 
                 
-            if nnz(table(i,1:day))< 2 % nnz --> number of non zero elements
+            if nnz(schedule_table(i,1:day))< 2 % nnz --> number of non zero elements
             
                 air_list(i) = count ;
             %%_____ defining arrival times for aircraft i in the form 'hhmm' (see function 'schedule.m' for further explanation') 
@@ -175,18 +175,18 @@ while t <= day-120
             
             
                 
-                table(i,1:day) = schedule(timearr,timedep,paxarr,paxdep);
+                schedule_table(i,1:day) = schedule(timearr,timedep,paxarr,paxdep);
                 
-                disp('________________________')
-                disp('aircraft number is: ')
-                disp(i)
-                disp('the arrival time is: ')
-                disp(timearr)
-                disp('the turn around time is: ')
-                disp(wait)
-                disp('the departure time is: ')
-                disp(timedep)
-                disp('________________________')
+%                 disp('________________________')
+%                 disp('aircraft number is: ')
+%                 disp(i)
+%                 disp('the arrival time is: ')
+%                 disp(timearr)
+%                 disp('the turn around time is: ')
+%                 disp(wait)
+%                 disp('the departure time is: ')
+%                 disp(timedep)
+%                 disp('________________________')
             
                 i = i+1;
                 count = count +1;
