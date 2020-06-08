@@ -1,0 +1,3 @@
+function index = varindex(var,i,s,j,t)
+    index = (i-1)*N_
+end
