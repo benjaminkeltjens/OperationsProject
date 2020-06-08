@@ -8,12 +8,12 @@
 
 %% The time interval between two arriving aircraft is defined by the variable 'int' and it is initially set to 15 minutes, but it can be changed as you like. The script has been tested with values of 10,11,12,13,15,17,20,25,26,30 minutes
 
-%% The schedule matrix is defined by the variable 'table': each row corresponds to one aircraft 
+%% The schedule matrix is defined by the variable 'schedule_table': each row corresponds to one aircraft 
 
 %%__________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 clc
-clear all
+% clear all
 
 int = 10; % each aircraft arrives every tot minutes as specified by int
 
@@ -27,7 +27,7 @@ air_types = [B777,B737,E190];
 day = 1440; % number of minutes in one day
 stop = 120; % how much time before midnight flights stop arriving (in minutes). This is needed to avoid that aircraft depart after midnight
 N = floor(day/int)-floor(stop/int) ; % number of aircraft in one day.   
-table= zeros(N,day); % schedule matrix
+schedule_table= zeros(N,day); % schedule matrix
 
 air_list = ones(1,N); % list of arriving aircraft types 
 
@@ -35,17 +35,6 @@ i = 1; % counter aircraft
 t = 1; % counter passing minutes in a day
 count = 1; % counter aircraft type
 
-% Defining delays 
-
-delrunarr = 1; % counter defining delayed aircraft (arrival) 
-deltotarr = 12; % after tot flights one aircraft is delayed (arrival) : so one aircraft in 'deltotarr' will arrive with a delay of 'delayarr' minutes
-delrundep = 1; % counter defining delayed aircraft (departure)
-deltotdep = 5; % after tot flights one aircraft is delayed (departure) : so one aircraft in 'deltotdep' will be delayed by 'delaydep' amount
-
-delayarr = 20; % aircraft delay in arrival (in minutes)
-delaydep = 35; % aircraft delay in departure (in minutes) 
-
-paxfactor = [0.6 0.75 0.90 1]; % list defining the factors to multiply the number of passengers with in order to obtain a number of arriving and departing passengers not necessarily equal to the max amount of pax for a specific aircraft type
 
 while t <= day-120
     
@@ -55,18 +44,13 @@ while t <= day-120
             
         if t/int-floor(t/int) == 0 % defines arrival time every tot minutes as specified by int. the if conditions implies an exact division 
                 
-            if nnz(table(i,1:day))< 2 % nnz --> number of non zero elements
+            if nnz(schedule_table(i,1:day))< 2 % nnz --> number of non zero elements
             
                 air_list(i) = count ;
             %%_____ defining arrival times for aircraft i in the form 'hhmm' (see function 'schedule.m' for further explanation') 
               
               
                 timearr_hours = t/60; % arrival time in hours
-                
-                if delrunarr == deltotarr
-                    timarr_hours = (t+delayarr)/60;
-                end
-                    
                 
                 if timearr_hours < 10
                     
@@ -117,19 +101,9 @@ while t <= day-120
                 aircraft = air_types(count);
                 %disp(aircraft)
                
-               
-                %__number of passengers
                 
-                itemarr = randi(length(paxfactor));
-                paxpickarr = paxfactor(itemarr);
-                
-                paxarr = floor(aircraft*paxpickarr); % so far it is assumed that aircraft arrive and depart with the same number of passengers
-                
-                itemdep = randi(length(paxfactor));
-                paxpickdep = paxfactor(itemdep);
-                paxdep = floor(aircraft*paxpickdep);
-                
-                %______turnaround times and delay times 
+                paxarr = aircraft; % so far it is assumed that aircraft arrive and depart with the same number of passengers
+                paxdep = aircraft;
                 
                 if aircraft == air_types(1) %B777
                     
@@ -144,21 +118,11 @@ while t <= day-120
                     wait = 35;
                 end
                 
-                
-               
                
                 
                 %% defining time of departure for aircraft i in the form 'hhmm'
                 
-                
-                
-                
                 timedep = t+wait; % departure time (in minutes from the beginning of the day)
-                
-                if delrundep == deltotdep
-                    timedep = t+wait+delaydep;
-                end
-                
                 timedep_hours = timedep/60;
               
                 
@@ -211,74 +175,27 @@ while t <= day-120
             
             
                 
-                table(i,1:day) = schedule(timearr,timedep,paxarr,paxdep);
+                schedule_table(i,1:day) = schedule(timearr,timedep,paxarr,paxdep);
                 
-                disp('__________________________________________________________')
-                disp('flight number is: ')
-                disp(i)
-                disp('...')
-                
-                if  count== 1
-                    disp('aircraft type is: ')
-                    disp('B777')
-                end
-                
-                if  count == 2
-                    disp('aircraft type is: ')
-                    disp('B737')
-                end
-                
-                if  count== 3
-                    disp('aircraft type is: ')
-                    disp('E190')
-                end
-                
-                disp('...')
-                
-                if delrunarr == deltotarr
-                    disp('the flight arrival time has been delayed by minutes: ')
-                    disp(delayarr)
-                end
-                disp('the arrival time is: ')
-                disp(timearr)
-                %disp('factor arr is: ')
-                %disp(paxpickarr)
-                disp('the number of arriving passengers is: ')
-                disp(paxarr)
-                disp('....')
-                disp('the turn around time is: ')
-                disp(wait)
-                
-                if delrundep == deltotdep
-                   disp('aircraft departure is delayed by minutes: ')
-                   disp(delaydep)
-                end
-                disp('...') 
-                disp('the departure time is: ')
-                disp(timedep)
-                %disp('factor dep is: ')
-                %disp(paxpickdep)
-                disp('and the number of departing passengers is: ')
-                disp(paxdep)
-             
-                disp('__________________________________________________________')
+%                 disp('________________________')
+%                 disp('aircraft number is: ')
+%                 disp(i)
+%                 disp('the arrival time is: ')
+%                 disp(timearr)
+%                 disp('the turn around time is: ')
+%                 disp(wait)
+%                 disp('the departure time is: ')
+%                 disp(timedep)
+%                 disp('________________________')
             
                 i = i+1;
                 count = count +1;
-                delrundep = delrundep +1; 
-                delrunarr = delrunarr +1;
                 
                 
                 if count == 4 % index count runs through the air_types list making sure that arriving aircraft alternate in type
                     count = 1;
-                end
                 
-                if delrundep == deltotdep+1
-                    delrundep = 1;
-                end
                 
-                if delrunarr == deltotarr+1
-                    delrunarr = 1;
                 end
                 
               
