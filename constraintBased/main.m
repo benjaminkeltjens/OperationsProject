@@ -10,6 +10,8 @@ N_aircraft = length(aircraft_list);
 N_gates = length(gate_matrix);
 N_stages = 6;
 N_steps = 1440/dt;
+buffer_time = 40;
+buffer = buffer_time/dt;
 
 aircraft_schedules = scheduleToDictionary(schedule_matrix, aircraft_list, dt);
 stage_presence = concurrentStages(aircraft_schedules,N_aircraft,dt);
@@ -49,13 +51,13 @@ cplex.addCols(obj, [], lb, ub, ctype,NameDV);
 % cplex.addCols(obj, [], lb, ub, ctype);
 objective_time = toc
 
-%% Constraint 1: One aircraft per gate
+%% Constraint 1: One aircraft per gate + Buffer
 disp('Generating Constraint 1')
 disp('____________________________')
 
 tic
 for t = 1:N_steps
-    i_s_combinations = getISCombinations(stage_presence,t);
+    i_s_combinations = getISCombinations(stage_presence,t,buffer);
     if ~isempty(i_s_combinations)
         for j = 1:N_gates-1 % -1 because remote can hold unlimited planes (remote is last gate always)
             C1 = zeros(1,DV);
@@ -143,7 +145,7 @@ cplex.solve();
 solve_time = toc
 
 solution = generateSolutionStruct(cplex.Solution.x, N_aircraft, N_stages, N_gates, aircraft_schedules);
-
+[~,~] = drawGantt(solution);
 
  
                     
