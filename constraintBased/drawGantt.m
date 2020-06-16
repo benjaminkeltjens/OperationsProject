@@ -1,7 +1,7 @@
 function [gate_stages, gap_duration] = drawGantt(solution)
     timetable = [solution.tow0stage1, solution.tow1stage1, solution.tow1stage2, solution.tow2stage1, solution.tow2stage2, solution.tow2stage3];
     
-%     N_active_stages = sum(solution.tow+1);
+    N_active_stages = sum(solution.tow+1);
     
     gate_stages = zeros(solution.N_gates,1);
     for i = 1:solution.N_gates
@@ -27,10 +27,38 @@ function [gate_stages, gap_duration] = drawGantt(solution)
         end
     end
     
-    chart = barh(1:1:size(gap_duration,1), gap_duration, 'stacked');
-    
+%     figure('Schedule');
+    chart = barh(1:1:size(gap_duration,1), gap_duration*solution.dt, 'stacked');
+    xlim([0, 1440])
+    xticks(linspace(0, 1440, 13))
+    xticklabels({'0:00','2:00','4:00','6:00','8:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','0:00'})
+    yticks(1:1:solution.N_gates)
+    xlabel('Time [HH:MM]');
+    ylabel('Gate Number');    
     set(chart(1:2:size(chart, 2)), 'Visible', 'off');
     set(chart(2:2:size(chart, 2)), 'FaceColor', 'y');
+    
+    %% Add text
+    % for each gate, go through each stage in gate
+    % unpack index to text name.
+    stage_map = [1, 0, 0; 2, 3, 0; 4, 5, 6];
+    
+    for j = 1:size(gate_stages,1)
+        stages = gate_stages(j,:);
+        if sum(stages) ~= 0
+            non_zero_s = nonzeros(stages); 
+            for s = 1:length(non_zero_s)
+                [aircraft,stage] = unwrapGates(non_zero_s(s), solution.N_aircraft);
+
+                tow = solution.tow(aircraft);
+                opt_stage = stage_map(tow+1, stage);
+                start = timetable(aircraft, (opt_stage*2)-1);
+
+                name = sprintf('i:%03d s:%01d',aircraft,stage);
+                text(start*solution.dt+1, j, name,'FontSize',9)
+            end
+        end
+    end
     
     
 end

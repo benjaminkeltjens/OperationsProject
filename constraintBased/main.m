@@ -4,6 +4,9 @@ clc
 clear
 
 %% Problem Set-up
+w1 = 1;
+w2 = 0;
+
 dt = 5; %Minutes
 [gate_matrix, tow_cost, aircraft_list, schedule_matrix] = getProblemVars(5);
 N_aircraft = length(aircraft_list);
@@ -11,11 +14,10 @@ N_gates = length(gate_matrix);
 N_stages = 6;
 N_steps = 1440/dt;
 buffer_time = 40;
-buffer = buffer_time/dt;
+buffer = floor(buffer_time/dt) + 1;
 
 aircraft_schedules = scheduleToDictionary(schedule_matrix, aircraft_list, dt);
 stage_presence = concurrentStages(aircraft_schedules,N_aircraft,dt);
-
 
 %% CPlex Set-up
 model = 'Bay-Assignment';
@@ -24,7 +26,8 @@ cplex.Model.sense = 'minimize';
 
 DV = N_aircraft*N_stages*N_gates + N_aircraft*3; % Bay Decision Variables + Tow Decision Variables
 obj = zeros(DV,1);
-
+max_cost_1 = max(schedule_matrix,[],'all') * max(gate_matrix(:,1));
+max_cost_2 = max(tow_cost);
 tic
 %% Objective Function
 disp('Generating Objective Function')
@@ -33,12 +36,12 @@ disp('____________________________')
 for i = 1:N_aircraft
     for s = 1:N_stages
         for j = 1:N_gates
-                obj(varIndex(i,s,j,N_stages,N_gates),1) =  costCoefficient(i,s,schedule_matrix,aircraft_schedules) * gate_matrix(j,1);
+                obj(varIndex(i,s,j,N_stages,N_gates),1) =  w1 * (1/max_cost_1) *costCoefficient(i,s,schedule_matrix,aircraft_schedules) * gate_matrix(j,1);
                 NameDV(varIndex(i,s,j,N_stages,N_gates),:) = ['X_' num2str(i,'%03d') '_' num2str(s,'%01d') '_' num2str(j,'%02d')];
         end
     end
     for n = 1:3
-        obj(towIndex(i,n,N_aircraft,N_stages,N_gates),1) = tow_cost(n);
+        obj(towIndex(i,n,N_aircraft,N_stages,N_gates),1) = w2* (1/max_cost_2) * tow_cost(n);
         NameDV(towIndex(i,n,N_aircraft,N_stages,N_gates),:) = ['Z___' num2str(i,'%03d') '__' num2str(n,'%01d')];
     end
 end
@@ -65,7 +68,7 @@ for t = 1:N_steps
                 i_s = i_s_combinations(m,:);
                 C1(varIndex(i_s(1),i_s(2),j,N_stages,N_gates)) = 1;
             end
-            cplex.addRows(-inf, C1, 1, sprintf('Constraint1%03d_%02d', t,j));
+            cplex.addRows(-inf, C1, 1, sprintf('Constraint1_%03d_%02d', t,j));
         end
     end
 end
@@ -80,7 +83,7 @@ for i = 1:N_aircraft
     for n = 1:3
         C2(towIndex(i,n,N_aircraft,N_stages,N_gates)) = 1;
     end
-    cplex.addRows(1,C2,1,sprintf('Constraint2%03d',i));
+    cplex.addRows(1,C2,1,sprintf('Constraint2_%03d',i));
 end
 constraint2_time = toc
 
@@ -103,7 +106,7 @@ for i = 1:N_aircraft
         if s == 4 || s == 5 || s == 6
             C3(towIndex(i,3,N_aircraft,N_stages,N_gates)) = -1;
         end
-        cplex.addRows(0,C3,0,sprintf('Constraint3%03d_%01d',i,s));  
+        cplex.addRows(0,C3,0,sprintf('Constraint3_%03d_%01d',i,s));  
     end
     
 end
@@ -145,6 +148,7 @@ cplex.solve();
 solve_time = toc
 
 solution = generateSolutionStruct(cplex.Solution.x, N_aircraft, N_stages, N_gates, aircraft_schedules);
+solution.dt = dt;
 [~,~] = drawGantt(solution);
 
  
