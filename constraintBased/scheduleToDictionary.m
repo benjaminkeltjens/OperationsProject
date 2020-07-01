@@ -35,11 +35,11 @@ function aircraft_schedules = scheduleToDictionary(schedule_matrix, aircraft_lis
         aircraft_schedules.tow1stage2(i,:) = [schedule_indices(1)+arrival_t+1, schedule_indices(2)];
         
         %2 Tow
-        assert(schedule_indices(1)+arrival_t+1 < schedule_indices(2)-(10/dt)); % Make sure that the remote period is not less or equal to zero
+        assert(schedule_indices(1)+arrival_t+1 < schedule_indices(2)-(15/dt)); % Make sure that the remote period is not less or equal to zero
         assert(schedule_indices(2)-(10/dt)+1 < schedule_indices(2)); % Make sure that departure is at least 2 steps long
         aircraft_schedules.tow2stage1(i,:) = [schedule_indices(1), schedule_indices(1)+arrival_t];
-        aircraft_schedules.tow2stage2(i,:) = [schedule_indices(1)+arrival_t+1, schedule_indices(2)-(10/dt)];
-        aircraft_schedules.tow2stage3(i,:) = [schedule_indices(2)-(10/dt)+1, schedule_indices(2)];
+        aircraft_schedules.tow2stage2(i,:) = [schedule_indices(1)+arrival_t+1, schedule_indices(2)-(15/dt)];
+        aircraft_schedules.tow2stage3(i,:) = [schedule_indices(2)-(15/dt)+1, schedule_indices(2)];
               
     end
 end

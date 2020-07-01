@@ -31,12 +31,13 @@ function [gate_stages, gap_duration] = drawGantt(solution)
     chart = barh(1:1:size(gap_duration,1), gap_duration*solution.dt, 'stacked');
     xlim([0, 1440])
     xticks(linspace(0, 1440, 13))
-    xticklabels({'0:00','2:00','4:00','6:00','8:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','0:00'})
+    xticklabels({'0:00','2:00','4:00','6:00','8:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00'})
     yticks(1:1:solution.N_gates)
     xlabel('Time [HH:MM]');
     ylabel('Gate Number');    
     set(chart(1:2:size(chart, 2)), 'Visible', 'off');
-    set(chart(2:2:size(chart, 2)), 'FaceColor', 'y');
+    set(chart(2:2:size(chart, 2)), 'FaceColor', [0.8500, 0.3250, 0.0980]);
+  
     
     %% Add text
     % for each gate, go through each stage in gate
@@ -53,13 +54,13 @@ function [gate_stages, gap_duration] = drawGantt(solution)
                 tow = solution.tow(aircraft);
                 opt_stage = stage_map(tow+1, stage);
                 start = timetable(aircraft, (opt_stage*2)-1);
-
-                name = sprintf('i:%03d s:%01d',aircraft,stage);
-                text(start*solution.dt+1, j, name,'FontSize',9)
+                
+                name = sprintf('i:%03d s:%01d',aircraft,opt_stage);
+                text(start*solution.dt+1, j+opt_stage*0.02, name,'FontSize',9)
             end
         end
     end
-    
+    set(gca,'FontSize',18);
     
 end
 

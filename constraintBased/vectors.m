@@ -5,7 +5,7 @@
 %% Assumption: 5 types of gates are considered: international gates ('I'), domestic gates ('D'), short term ('ST', these are accessible with the bus (which is already taken into account into the gate to entrance times)), extra gates ('E') and long term parking ('CARGO'-these are the ones very far away for which you need two tows and you have unlimited availability).  
 
 
-clc
+% clc
 
 weightvec = [[1 0 0], [0 1 0], [0 0 1]]; % [1 0 0] corresponds to B777, [0 1 0] corresponds to B737, [0 0 1] corresponds to E 190
 
@@ -57,6 +57,10 @@ T = readtable('JKIA_data_sheet.xlsx','Sheet','Sheet2','ReadVariablenames',true);
 times = T(1:35,3);
 times = table2array(times);
 
+gate_def = T(1:35,1);
+gate_def = table2array(gate_def);
+gate_def = string(gate_def);
+
 T1 = readtable('JKIA_data_sheet.xlsx','Sheet','Sheet3');
 gsize = T1(1:35,1:3);
 gsize = table2array(gsize);
@@ -95,3 +99,4 @@ gates_matrix = ones ( 35 ,4 );
 
  end
 
+ 

@@ -5,16 +5,16 @@ clear
 
 %% Problem Set-up
 w1 = 1;
-w2 = 0;
+w2 = 0.1;
 
 dt = 5; %Minutes
-[gate_matrix, tow_cost, aircraft_list, schedule_matrix] = getProblemVars(5);
+[gate_matrix, tow_cost, aircraft_list, schedule_matrix] = getProblemVars(dt);
 N_aircraft = length(aircraft_list);
 N_gates = length(gate_matrix);
 N_stages = 6;
 N_steps = 1440/dt;
-buffer_time = 40;
-buffer = floor(buffer_time/dt) + 1;
+buffer_time = 15;
+buffer = floor(buffer_time/dt);
 
 aircraft_schedules = scheduleToDictionary(schedule_matrix, aircraft_list, dt);
 stage_presence = concurrentStages(aircraft_schedules,N_aircraft,dt);
@@ -149,6 +149,9 @@ solve_time = toc
 
 solution = generateSolutionStruct(cplex.Solution.x, N_aircraft, N_stages, N_gates, aircraft_schedules);
 solution.dt = dt;
+
+[total_time, tows_0, tows_1, tows_2] = produceStats(solution, gate_matrix, schedule_matrix, aircraft_schedules);
+
 [~,~] = drawGantt(solution);
 
  
