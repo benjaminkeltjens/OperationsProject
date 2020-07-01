@@ -13,7 +13,7 @@ N_aircraft = length(aircraft_list);
 N_gates = length(gate_matrix);
 N_stages = 6;
 N_steps = 1440/dt;
-buffer_time = 15;
+buffer_time = 50;
 buffer = floor(buffer_time/dt);
 
 aircraft_schedules = scheduleToDictionary(schedule_matrix, aircraft_list, dt);
